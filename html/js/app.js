@@ -1,37 +1,38 @@
-(function() {
-	let MenuTpl =
-		'<div id="menu_{{_namespace}}_{{_name}}" class="menu{{#align}} align-{{align}}{{/align}}">' +
-			'<div class="head"><span>{{{title}}}</span></div>' +					
-				'<div class="desciption">{{{subtext}}}</div>' +
-				'<div class="menu-items">' +
-				'<div class="topline"></div>' +
-					'{{#elements}}' +
-						'<div class="menu-item {{#selected}}selected{{/selected}} {{#isSlider}}slider{{/isSlider}}">' +
-							'<div id="item-label">{{{label}}}</div><div class="arrows">{{#isSlider}}<i class="fas fa-chevron-left"></i><div id="slider-label">{{{sliderLabel}}}</div><i class="fas fa-chevron-right"></i>{{/isSlider}}</div>' +
-						'</div>' +
-										
-					'{{/elements}}' +
-				'</div>'+
-				'<div class="scrollbottom"></div>' +
-				'{{#elements}}' +
-				'{{#selected}}' +
-				'<div class="options-amount">{{{list_id}}}/{{{list_max}}}</div>' +
-				'<br>'+
-				'<div class="desciption">{{{desc}}}</div>' +
-				'{{/selected}}' +
-				'{{/elements}}' +
-				'<br>'+
-			'</div>' +
-		'</div>'
-	;
+(function () {
+    let MenuTpl =
+        '<div id="menu_{{_namespace}}_{{_name}}" class="menu{{#align}} align-{{align}}{{/align}}">' +
+        '<div class="head"><span>{{{title}}}</span></div>' +
+        '<div class="desciptions">{{{subtext}}}</div>' +
+        '<div class="menu-items">' +
+        '<div class="topline"></div>' +
+        '{{#elements}}' +
+        '<div class="menu-item {{#selected}}selected{{/selected}} {{#isSlider}}slider{{/isSlider}}" style="height:{{itemHeight}};!important">' +
+        '<div id="item-label">{{{label}}}</div><div class="arrows">{{#isSlider}}<i class="fas fa-chevron-left"></i><div id="slider-label">{{{sliderLabel}}}</div><i class="fas fa-chevron-right"></i>{{/isSlider}}</div>' +
+        '</div>' +
+
+        '{{/elements}}' +
+        '</div>' +
+        '<div class="scrollbottom"></div>' +
+        '{{#elements}}' +
+        '{{#selected}}' +
+        '<div class="options-amount">{{{list_id}}}/{{{list_max}}}</div>' +
+        '<br>' +
+        '<div class="desciption">{{{desc}}}</div>' +
+        '{{/selected}}' +
+        '{{/elements}}' +
+        '<br>' +
+        '</div>' +
+        '</div>'
+        ;
 
     window.MenuData = {};
     MenuData.ResourceName = 'menu_base';
     MenuData.opened = {};
     MenuData.focus = [];
     MenuData.pos = {};
-
-    MenuData.open = function(namespace, name, data) {
+    let lastmenu
+    MenuData.open = function (namespace, name, data) {
+        lastmenu = data.lastmenu
         if (typeof MenuData.opened[namespace] == 'undefined') {
             MenuData.opened[namespace] = {};
         }
@@ -79,7 +80,7 @@
         $('#menu_' + namespace + '_' + name).find('.menu-item.selected')[0].scrollIntoView();
     };
 
-    MenuData.close = function(namespace, name) {
+    MenuData.close = function (namespace, name) {
         delete MenuData.opened[namespace][name];
 
         for (let i = 0; i < MenuData.focus.length; i++) {
@@ -92,7 +93,7 @@
         MenuData.render();
     };
 
-    MenuData.render = function() {
+    MenuData.render = function () {
         let menuContainer = document.getElementById('menus');
         let focused = MenuData.getFocused();
         menuContainer.innerHTML = '';
@@ -108,22 +109,22 @@
 
                     switch (element.type) {
                         case 'default':
-							element.list_id = i + 1;
-							element.list_max = menuData.elements.length;
+                            element.list_id = i + 1;
+                            element.list_max = menuData.elements.length;
                             break;
 
                         case 'slider': {
                             element.isSlider = true;
-							element.list_id = i + 1;
-							element.list_max = menuData.elements.length;
+                            element.list_id = i + 1;
+                            element.list_max = menuData.elements.length;
                             element.sliderLabel = (typeof element.options == 'undefined') ? element.value : element.options[element.value];
 
                             break;
                         }
 
                         default:
-							element.list_id = i + 1;
-							element.list_max = menuData.elements.length;
+                            element.list_id = i + 1;
+                            element.list_max = menuData.elements.length;
                             break;
                     }
 
@@ -146,23 +147,33 @@
 
     };
 
-    MenuData.submit = function(namespace, name, data) {
-        $.post('http://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
-            _namespace: namespace,
-            _name: name,
-            current: data,
-            elements: MenuData.opened[namespace][name].elements
-        }));
+    MenuData.submit = function (namespace, name, data) {
+        if (data == "backup") {
+            $.post('http://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
+                _namespace: namespace,
+                _name: name,
+                current: data,
+                trigger: lastmenu,
+                elements: MenuData.opened[namespace][name].elements
+            }));
+        } else {
+            $.post('http://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
+                _namespace: namespace,
+                _name: name,
+                current: data,
+                elements: MenuData.opened[namespace][name].elements
+            }));
+        }
     };
 
-    MenuData.cancel = function(namespace, name) {
+    MenuData.cancel = function (namespace, name) {
         $.post('http://' + MenuData.ResourceName + '/menu_cancel', JSON.stringify({
             _namespace: namespace,
             _name: name,
         }));
     };
 
-    MenuData.change = function(namespace, name, data) {
+    MenuData.change = function (namespace, name, data) {
         $.post('http://' + MenuData.ResourceName + '/menu_change', JSON.stringify({
             _namespace: namespace,
             _name: name,
@@ -171,7 +182,7 @@
         }));
     };
 
-    MenuData.getFocused = function() {
+    MenuData.getFocused = function () {
         return MenuData.focus[MenuData.focus.length - 1];
     };
 
@@ -209,11 +220,18 @@
 
                     case 'BACKSPACE': {
                         let focused = MenuData.getFocused();
-
-                        if (typeof focused != 'undefined') {
-                            MenuData.cancel(focused.namespace, focused.name);
+                        if (lastmenu == null) {
+                            lastmenu = ""
                         }
-
+                        if (lastmenu != 'undefined' && lastmenu != '') {
+                            let menu = MenuData.opened[focused.namespace][focused.name];
+                            let pos = MenuData.pos[focused.namespace][focused.name];
+                            let elem = menu.elements[pos];
+                            MenuData.submit(focused.namespace, focused.name, "backup");
+                        } else if (typeof focused != 'undefined') {
+                            MenuData.cancel(focused.namespace, focused.name);
+                            $.post('http://menu_base/closeui', JSON.stringify({}));
+                        }
                         break;
                     }
 
@@ -297,18 +315,19 @@
                                     break;
 
                                 case 'slider': {
-                                    let min = (typeof elem.min == 'undefined') ? 0 : elem.min;		
+                                    let min = (typeof elem.min == 'undefined') ? 0 : elem.min;
                                     if (elem.value > min) {
-                                        if(typeof elem.hop != 'undefined'){			
-											 elem.value = (elem.value - elem.hop);
-											 if (elem.value < min){
-												 elem.value = min
-											 }
-										}
-										else{
-                                        elem.value--;
-										}
+                                        if (typeof elem.hop != 'undefined') {
+                                            elem.value = (elem.value - elem.hop);
+                                            if (elem.value < min) {
+                                                elem.value = min
+                                            }
+                                        }
+                                        else {
+                                            elem.value--;
+                                        }
                                         MenuData.change(focused.namespace, focused.name, elem);
+                                        MenuData.submit(focused.namespace, focused.name, elem);
                                     }
 
                                     MenuData.render();
@@ -341,24 +360,26 @@
                                     if (typeof elem.options != 'undefined' && elem.value < elem.options.length - 1) {
                                         elem.value++;
                                         MenuData.change(focused.namespace, focused.name, elem);
+                                        MenuData.submit(focused.namespace, focused.name, elem);
                                     }
 
                                     if (typeof elem.max != 'undefined' && elem.value < elem.max) {
-										
-										if( typeof elem.hop != 'undefined'){
-											let min = (typeof elem.min == 'undefined') ? 0 : elem.min;
-											if(min > 0 && min == elem.value){
-												elem.value = 0;
-											}
-											 elem.value =  (elem.value + elem.hop);
-											  if (elem.value > elem.max){
-												 elem.value = elem.max
-											 }
-										}
-										else{
-											elem.value++;
-										}
+
+                                        if (typeof elem.hop != 'undefined') {
+                                            let min = (typeof elem.min == 'undefined') ? 0 : elem.min;
+                                            if (min > 0 && min == elem.value) {
+                                                elem.value = 0;
+                                            }
+                                            elem.value = (elem.value + elem.hop);
+                                            if (elem.value > elem.max) {
+                                                elem.value = elem.max
+                                            }
+                                        }
+                                        else {
+                                            elem.value++;
+                                        }
                                         MenuData.change(focused.namespace, focused.name, elem);
+                                        MenuData.submit(focused.namespace, focused.name, elem);
                                     }
 
                                     MenuData.render();
@@ -384,7 +405,7 @@
         }
     };
 
-    window.onload = function(e) {
+    window.onload = function (e) {
         window.addEventListener('message', (event) => {
             onData(event.data);
         });

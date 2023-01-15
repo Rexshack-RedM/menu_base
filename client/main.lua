@@ -2,7 +2,6 @@ MenuData = {}
 MenuData.Opened = {}
 MenuData.RegisteredTypes = {}
 
---==================================FUNCTIONS ==================================
 MenuData.RegisteredTypes['default'] = {
     open  = function(namespace, name, data)
         SendNUIMessage({
@@ -49,7 +48,6 @@ function MenuData.Open(type, namespace, name, data, submit, cancel, change, clos
         if close then
             close()
         end
-
     end
 
     menu.update = function(query, newData)
@@ -93,7 +91,7 @@ function MenuData.Open(type, namespace, name, data, submit, cancel, change, clos
             for k,v in pairs(query) do
                 if menu.data.elements[i] then
                     if menu.data.elements[i][k] == v then
-						menu.data.elements[i] = nil
+                        menu.data.elements[i] = nil
                         break
                     end
                 end
@@ -101,7 +99,7 @@ function MenuData.Open(type, namespace, name, data, submit, cancel, change, clos
             end
         end
     end
-	MenuData.Opened[#MenuData.Opened+1]= menu
+    MenuData.Opened[#MenuData.Opened+1]= menu
     MenuData.RegisteredTypes[type].open(namespace, name, data)
     PlaySoundFrontend("SELECT", "RDRO_Character_Creator_Sounds", true, 0)
     return menu
@@ -148,12 +146,6 @@ end
 function MenuData.ReOpen(oldMenu)
     MenuData.Open(oldMenu.type, oldMenu.namespace, oldMenu.name, oldMenu.data, oldMenu.submit, oldMenu.cancel, oldMenu.change, oldMenu.close)
 end
-
-
---==================================FUNCTIONS ==================================
-
---================================== CALLBACKS ==================================
-
 local Timer, MenuType = 0, 'default'
 
 
@@ -195,10 +187,7 @@ RegisterNUICallback('menu_change', function(data)
         menu.change(data, menu)
     end
 end)
---================================== CALLBACKS ==================================
 
-
---==================================  CONTROL SECTION =========================================
 Citizen.CreateThread(function()
     local PauseMenuState    = false
     local MenusToReOpen     = {}
@@ -252,11 +241,10 @@ Citizen.CreateThread(function()
     end
 end)
 
+RegisterNUICallback('closeui', function(data)
+    TriggerEvent("menu_base:closemenu")
+end)
 
---==================================  CONTROL SECTION =========================================
-
---==================================  SHARE FUNCTIONS =========================================
 AddEventHandler('menu_base:getData', function(cb)
     cb(MenuData)
 end)
---==================================  SHARE FUNCTIONS =========================================
