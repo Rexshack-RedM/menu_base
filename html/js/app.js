@@ -149,7 +149,7 @@
 
     MenuData.submit = function (namespace, name, data) {
         if (data == "backup") {
-            $.post('http://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
+            $.post('https://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
                 _namespace: namespace,
                 _name: name,
                 current: data,
@@ -157,7 +157,7 @@
                 elements: MenuData.opened[namespace][name].elements
             }));
         } else {
-            $.post('http://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
+            $.post('https://' + MenuData.ResourceName + '/menu_submit', JSON.stringify({
                 _namespace: namespace,
                 _name: name,
                 current: data,
@@ -167,14 +167,14 @@
     };
 
     MenuData.cancel = function (namespace, name) {
-        $.post('http://' + MenuData.ResourceName + '/menu_cancel', JSON.stringify({
+        $.post('https://' + MenuData.ResourceName + '/menu_cancel', JSON.stringify({
             _namespace: namespace,
             _name: name,
         }));
     };
 
     MenuData.change = function (namespace, name, data) {
-        $.post('http://' + MenuData.ResourceName + '/menu_change', JSON.stringify({
+        $.post('https://' + MenuData.ResourceName + '/menu_change', JSON.stringify({
             _namespace: namespace,
             _name: name,
             current: data,
@@ -230,7 +230,7 @@
                             MenuData.submit(focused.namespace, focused.name, "backup");
                         } else if (typeof focused != 'undefined') {
                             MenuData.cancel(focused.namespace, focused.name);
-                            $.post('http://menu_base/closeui', JSON.stringify({}));
+                            $.post('https://menu_base/closeui', JSON.stringify({}));
                         }
                         break;
                     }
@@ -260,7 +260,7 @@
 
                             MenuData.change(focused.namespace, focused.name, elem);
                             MenuData.render();
-                            $.post('http://' + MenuData.ResourceName + '/playsound');
+                            $.post('https://' + MenuData.ResourceName + '/playsound');
 
                             $('#menu_' + focused.namespace + '_' + focused.name).find('.menu-item.selected')[0].scrollIntoView();
                         }
@@ -294,7 +294,7 @@
 
                             MenuData.change(focused.namespace, focused.name, elem);
                             MenuData.render();
-                            $.post('http://' + MenuData.ResourceName + '/playsound');
+                            $.post('https://' + MenuData.ResourceName + '/playsound');
 
                             $('#menu_' + focused.namespace + '_' + focused.name).find('.menu-item.selected')[0].scrollIntoView();
                         }
